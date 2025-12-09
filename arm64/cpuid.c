@@ -53,6 +53,15 @@ int main()
     size_t size = 4;
     uint32_t res;
 
+    // Apple Silicon CPU without support for SVE
+    // but Apple-M4 support for SME/Streaming SVE
+    // On M4, this a large SME block in the P-core cluster (shared by the four performance cores) 
+    // and a smaller SME block in the E-ore cluster (shared by the six efficiency cores). 
+    sysctlbyname("hw.optional.arm.FEAT_SME", &res, &size, NULL, 0);
+    if (res == 1) {
+        printf("_SME_\n");
+    }
+
     sysctlbyname("hw.optional.arm.FEAT_I8MM", &res, &size, NULL, 0);
     if (res == 1) {
         printf("_I8MM_\n");
