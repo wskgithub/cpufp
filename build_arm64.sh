@@ -28,6 +28,9 @@ AS_EXTRA_FLAGS="-mcpu=all"
 if [ "${OS}" == "Darwin" ]; then
     AS_EXTRA_FLAGS="-mcpu=apple-m2"
 fi
+if [[ "$SIMD" == "_SVE_" ]]; then
+    AS_EXTRA_FLAGS="-march=armv8.5-a+sve"
+fi
 for SIMD in `$BUILD_DIR/cpuid`;
 do
     SIMD_MACRO="$SIMD_MACRO-D$SIMD "

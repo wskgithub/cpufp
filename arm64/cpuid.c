@@ -49,6 +49,13 @@ int main()
         printf("_ASIMD_\n");
     }
 #endif
+
+#ifdef HWCAP_SVE
+    if (hwcaps & HWCAP_SVE)
+    {
+        printf("_SVE_\n");
+    }
+#endif
 #else
     size_t size = 4;
     uint32_t res;

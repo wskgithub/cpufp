@@ -12,6 +12,18 @@
 
 using namespace std;
 
+// Debug mode: reduce loop iterations for faster testing (e.g., in QEMU)
+// Set CPUFP_DEBUG_MODE=1 to enable debug mode with fewer iterations
+#ifndef CPUFP_DEBUG_MODE
+#define CPUFP_DEBUG_MODE 0
+#endif
+
+#if CPUFP_DEBUG_MODE
+#define LOOP_ITERATIONS 1  // 1M iterations for debug (fast)
+#else
+#define LOOP_ITERATIONS 0x10000000LL  // 268M iterations for release (accurate)
+#endif
+
 extern "C"
 {
 #ifdef _ASIMD_
@@ -47,6 +59,14 @@ extern "C"
     void asimd_dp4a_vs_s32s8u8(int64_t);
     void asimd_dp4a_vs_s32u8s8(int64_t);
     void asimd_dp4a_vv_s32u8s8(int64_t);
+#endif
+
+#ifdef _SVE_
+    void sve_fmla_vv_f16f16f16(int64_t);
+    void sve_fmla_vv_f32f32f32(int64_t);
+    void sve_fmla_vs_f32f32f32(int64_t);
+    void sve_fmla_vs_f64f64f64(int64_t);
+    void sve_fmla_vv_f64f64f64(int64_t);
 #endif
 }
 
@@ -266,56 +286,77 @@ static void cpufp_register_isa()
 {
 #ifdef _I8MM_
     reg_new_isa("i8mm", "mmla(s32,s8,s8)", "OPS",
-        0x10000000LL, 1536LL, asimd_mmla_s32s8s8);
+        LOOP_ITERATIONS, 1536LL, asimd_mmla_s32s8s8);
     reg_new_isa("i8mm", "mmla(u32,u8,u8)", "OPS",
-        0x10000000LL, 1536LL, asimd_mmla_u32u8u8);
+        LOOP_ITERATIONS, 1536LL, asimd_mmla_u32u8u8);
     reg_new_isa("i8mm", "mmla(s32,u8,s8)", "OPS",
-        0x10000000LL, 1536LL, asimd_mmla_s32u8s8);
+        LOOP_ITERATIONS, 1536LL, asimd_mmla_s32u8s8);
     
     reg_new_isa("i8mm", "dp4a.vs(s32,s8,u8)", "OPS",
-        0x10000000LL, 768LL, asimd_dp4a_vs_s32s8u8);
+        LOOP_ITERATIONS, 768LL, asimd_dp4a_vs_s32s8u8);
     reg_new_isa("i8mm", "dp4a.vs(s32,u8,s8)", "OPS",
-        0x10000000LL, 768LL, asimd_dp4a_vs_s32u8s8);
+        LOOP_ITERATIONS, 768LL, asimd_dp4a_vs_s32u8s8);
     reg_new_isa("i8mm", "dp4a.vv(s32,u8,s8)", "OPS",
-        0x10000000LL, 768LL, asimd_dp4a_vv_s32u8s8);
+        LOOP_ITERATIONS, 768LL, asimd_dp4a_vv_s32u8s8);
 #endif
 
 #ifdef _ASIMD_DP_
     reg_new_isa("asimd_dp", "dp4a.vs(s32,s8,s8)", "OPS",
-        0x10000000LL, 768LL, asimd_dp4a_vs_s32s8s8);
+        LOOP_ITERATIONS, 768LL, asimd_dp4a_vs_s32s8s8);
     reg_new_isa("asimd_dp", "dp4a.vv(s32,s8,s8)", "OPS",
-        0x10000000LL, 768LL, asimd_dp4a_vv_s32s8s8);
+        LOOP_ITERATIONS, 768LL, asimd_dp4a_vv_s32s8s8);
     reg_new_isa("asimd_dp", "dp4a.vs(u32,u8,u8)", "OPS",
-        0x10000000LL, 768LL, asimd_dp4a_vs_u32u8u8);
+        LOOP_ITERATIONS, 768LL, asimd_dp4a_vs_u32u8u8);
     reg_new_isa("asimd_dp", "dp4a.vv(u32,u8,u8)", "OPS",
-        0x10000000LL, 768LL, asimd_dp4a_vv_u32u8u8);
+        LOOP_ITERATIONS, 768LL, asimd_dp4a_vv_u32u8u8);
 #endif
 
 #ifdef _BF16_
     reg_new_isa("bf16", "mmla(f32,bf16,bf16)", "FLOPS",
-        0x10000000LL, 768LL, asimd_mmla_fp32bf16bf16);
+        LOOP_ITERATIONS, 768LL, asimd_mmla_fp32bf16bf16);
     reg_new_isa("bf16", "dp2a.vs(f32,bf16,bf16)", "FLOPS",
-        0x10000000LL, 384LL, asimd_dp2a_vs_fp32bf16bf16);
+        LOOP_ITERATIONS, 384LL, asimd_dp2a_vs_fp32bf16bf16);
     reg_new_isa("bf16", "dp2a.vv(f32,bf16,bf16)", "FLOPS",
-        0x10000000LL, 384LL, asimd_dp2a_vv_fp32bf16bf16);
+        LOOP_ITERATIONS, 384LL, asimd_dp2a_vv_fp32bf16bf16);
 #endif
 
 #ifdef _ASIMD_HP_
     reg_new_isa("asimd_hp", "fmla.vs(fp16,fp16,fp16)", "FLOPS",
-        0x10000000LL, 384LL, asimd_fmla_vs_fp16fp16fp16);
+        LOOP_ITERATIONS, 384LL, asimd_fmla_vs_fp16fp16fp16);
     reg_new_isa("asimd_hp", "fmla.vv(fp16,fp16,fp16)", "FLOPS",
-        0x10000000LL, 384LL, asimd_fmla_vv_fp16fp16fp16);
+        LOOP_ITERATIONS, 384LL, asimd_fmla_vv_fp16fp16fp16);
 #endif
 
 #ifdef _ASIMD_
     reg_new_isa("asimd", "fmla.vs(f32,f32,f32)", "FLOPS",
-        0x10000000LL, 192LL, asimd_fmla_vs_f32f32f32);
+        LOOP_ITERATIONS, 192LL, asimd_fmla_vs_f32f32f32);
     reg_new_isa("asimd", "fmla.vv(f32,f32,f32)", "FLOPS",
-        0x10000000LL, 192LL, asimd_fmla_vv_f32f32f32);
+        LOOP_ITERATIONS, 192LL, asimd_fmla_vv_f32f32f32);
     reg_new_isa("asimd", "fmla.vs(f64,f64,f64)", "FLOPS",
-        0x10000000LL, 96LL, asimd_fmla_vs_f64f64f64);
+        LOOP_ITERATIONS, 96LL, asimd_fmla_vs_f64f64f64);
     reg_new_isa("asimd", "fmla.vv(f64,f64,f64)", "FLOPS",
-        0x10000000LL, 96LL, asimd_fmla_vv_f64f64f64);
+        LOOP_ITERATIONS, 96LL, asimd_fmla_vv_f64f64f64);
+#endif
+
+#ifdef _SVE_
+    size_t sve_len = 0;
+    __asm__ volatile("cntb %[len]" : [len] "=r"(sve_len));
+
+    int64_t comp_pl_f16 = 48LL * (sve_len / 2);
+    reg_new_isa("sve", "fmla.vv(f16,f16,f16)", "FLOPS", LOOP_ITERATIONS,
+                comp_pl_f16, sve_fmla_vv_f16f16f16);
+
+    int64_t comp_pl_f32 = 48LL * (sve_len / 4);
+    reg_new_isa("sve", "fmla.vv(f32,f32,f32)", "FLOPS", LOOP_ITERATIONS,
+                comp_pl_f32, sve_fmla_vv_f32f32f32);
+    reg_new_isa("sve", "fmla.vs(f32,f32,f32)", "FLOPS", LOOP_ITERATIONS,
+                comp_pl_f32, sve_fmla_vs_f32f32f32);
+
+    int64_t comp_pl_f64 = 48LL * (sve_len / 8);
+    reg_new_isa("sve", "fmla.vv(f64,f64,f64)", "FLOPS", LOOP_ITERATIONS,
+                comp_pl_f64, sve_fmla_vv_f64f64f64);
+    reg_new_isa("sve", "fmla.vs(f64,f64,f64)", "FLOPS", LOOP_ITERATIONS,
+                comp_pl_f64, sve_fmla_vs_f64f64f64);
 #endif
 }
 
