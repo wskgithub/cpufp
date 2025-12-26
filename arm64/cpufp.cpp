@@ -64,8 +64,6 @@ extern "C"
 #ifdef _SVE_
     void sve_fmla_vv_f16f16f16(int64_t);
     void sve_fmla_vv_f32f32f32(int64_t);
-    void sve_fmla_vs_f32f32f32(int64_t);
-    void sve_fmla_vs_f64f64f64(int64_t);
     void sve_fmla_vv_f64f64f64(int64_t);
 #endif
 
@@ -353,18 +351,12 @@ static void cpufp_register_isa()
     int64_t comp_pl_f16 = 48LL * (sve_len / 2);
     reg_new_isa("sve", "fmla.vv(f16,f16,f16)", "FLOPS", LOOP_ITERATIONS,
                 comp_pl_f16, sve_fmla_vv_f16f16f16);
-
     int64_t comp_pl_f32 = 48LL * (sve_len / 4);
     reg_new_isa("sve", "fmla.vv(f32,f32,f32)", "FLOPS", LOOP_ITERATIONS,
                 comp_pl_f32, sve_fmla_vv_f32f32f32);
-    reg_new_isa("sve", "fmla.vs(f32,f32,f32)", "FLOPS", LOOP_ITERATIONS,
-                comp_pl_f32, sve_fmla_vs_f32f32f32);
-
     int64_t comp_pl_f64 = 48LL * (sve_len / 8);
     reg_new_isa("sve", "fmla.vv(f64,f64,f64)", "FLOPS", LOOP_ITERATIONS,
                 comp_pl_f64, sve_fmla_vv_f64f64f64);
-    reg_new_isa("sve", "fmla.vs(f64,f64,f64)", "FLOPS", LOOP_ITERATIONS,
-                comp_pl_f64, sve_fmla_vs_f64f64f64);
 #endif
 
 #ifdef _SME_

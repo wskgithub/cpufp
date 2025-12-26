@@ -1,8 +1,7 @@
 .text
-.global _smtest
+.global svetest
 
-_smtest:
-    smstart sm
+svetest:
     cntb x16
     lsl x17, x16, #3
     sub sp, sp, x17
@@ -26,5 +25,4 @@ _smtest:
     ldr z15, [sp, #7, MUL VL]
     
     add sp, sp, x17     // 恢复栈指针
-    smstop sm
     ret

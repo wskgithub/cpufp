@@ -82,8 +82,9 @@ ${CXX} -O3 -pthread -c $COMM/smtl.cpp -o $BUILD_DIR/smtl.o
 
 # Build cpuid for target architecture
 # Note: cpuid needs to run on target to detect features, but we can pre-define features
+# Use static linking for Android compatibility (Android uses /system/bin/linker64 instead of /lib/ld-linux-aarch64.so.1)
 echo "Building cpuid detection tool..."
-${CC} $SRC/cpuid.c -o $BUILD_DIR/cpuid_arm64
+${CC} -static $SRC/cpuid.c -o $BUILD_DIR/cpuid_arm64
 
 # Define SIMD features to include
 # For cross-compilation, we include all common ARM64 SIMD features
@@ -180,8 +181,9 @@ fi
 ${CXX} -std=gnu++17 -O3 $CXX_ARCH_FLAGS -I$COMM $SIMD_MACRO -c $SRC/cpufp.cpp -o $BUILD_DIR/cpufp.o
 
 # Link final executable
+# Use static linking for Android compatibility (Android uses /system/bin/linker64 instead of /lib/ld-linux-aarch64.so.1)
 echo "Linking cpufp..."
-${CXX} -std=gnu++17 -O3 -z noexecstack -pthread -o cpufp_arm64 \
+${CXX} -std=gnu++17 -O3 -z noexecstack -pthread -static -o cpufp_arm64 \
     $BUILD_DIR/cpufp.o $BUILD_DIR/smtl.o $BUILD_DIR/table.o $SIMD_OBJ
 
 echo ""
