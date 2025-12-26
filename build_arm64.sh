@@ -24,25 +24,41 @@ fi
 gcc $SRC/cpuid.c -o $BUILD_DIR/cpuid
 SIMD_MACRO=" "
 SIMD_OBJ=" "
-AS_EXTRA_FLAGS="-mcpu=all"
-if [ "${OS}" == "Darwin" ]; then
-    AS_EXTRA_FLAGS="-mcpu=apple-m2"
-fi
-if [[ "$SIMD" == "_SVE_" ]]; then
-    AS_EXTRA_FLAGS="-march=armv8.5-a+sve"
-fi
 for SIMD in `$BUILD_DIR/cpuid`;
 do
     SIMD_MACRO="$SIMD_MACRO-D$SIMD "
     SIMD_OBJ="$SIMD_OBJ$BUILD_DIR/$SIMD.o "
+    
+    # Set appropriate flags for each SIMD type
+    AS_EXTRA_FLAGS=""
+    if [ "${OS}" == "Darwin" ]; then
+        AS_EXTRA_FLAGS="-mcpu=apple-m2"
+    else
+        AS_EXTRA_FLAGS="-mcpu=all"
+    fi
+    
+    if [[ "$SIMD" == "_SVE_" ]]; then
+        AS_EXTRA_FLAGS="-march=armv8.5-a+sve"
+    elif [[ "$SIMD" == "_SME_" ]]; then
+        AS_EXTRA_FLAGS="-march=armv9-a+sme"
+    fi
+    
     as ${AS_EXTRA_FLAGS} -c $ASM/$SIMD.S -o $BUILD_DIR/$SIMD.o
 done
 
 # compile cpufp
+# Add architecture flags if SVE or SME is enabled
+ARCH_FLAGS=""
+if echo "$SIMD_MACRO" | grep -q "_SVE_"; then
+    ARCH_FLAGS="-march=armv8.5-a+sve"
+elif echo "$SIMD_MACRO" | grep -q "_SME_"; then
+    ARCH_FLAGS="-march=armv9-a+sme"
+fi
+
 if [ "${OS}" != "Darwin" ]; then
-g++ -std=gnu++17 -O3 -I$COMM $SIMD_MACRO -c $SRC/cpufp.cpp -o $BUILD_DIR/cpufp.o
+g++ -std=gnu++17 -O3 -I$COMM $SIMD_MACRO $ARCH_FLAGS -c $SRC/cpufp.cpp -o $BUILD_DIR/cpufp.o
 g++ -std=gnu++17 -O3 -z noexecstack -pthread -o cpufp $BUILD_DIR/cpufp.o $BUILD_DIR/smtl.o $BUILD_DIR/table.o $SIMD_OBJ
 else
-g++ -O3 -I$COMM $SIMD_MACRO -c $SRC/cpufp.cpp -o $BUILD_DIR/cpufp.o
+g++ -O3 -I$COMM $SIMD_MACRO $ARCH_FLAGS -c $SRC/cpufp.cpp -o $BUILD_DIR/cpufp.o
 g++ -O3 -pthread -o cpufp $BUILD_DIR/cpufp.o $BUILD_DIR/smtl.o $BUILD_DIR/table.o $SIMD_OBJ
 fi

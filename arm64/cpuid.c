@@ -84,6 +84,12 @@ int main()
     if (res == 1) {
         printf("_ASIMD_\n");
     }
+
+    sysctlbyname("hw.optional.arm.FEAT_SME", &res, &size, NULL, 0);
+    if (res == 1) {
+        // printf("_SVE_\n");
+        printf("_SME_\n");
+    }
 #endif
 
     return 0;

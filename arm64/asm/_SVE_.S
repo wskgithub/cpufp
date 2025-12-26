@@ -1,6 +1,9 @@
 .align 4
 
 .macro preserve_caller_vec
+#ifdef __APPLE__
+    smstart sm
+#endif
     cntb x16
     lsl x17, x16, #3
     sub sp, sp, x17
@@ -25,6 +28,9 @@
     ldr z14, [sp, #6, MUL VL]
     ldr z15, [sp, #7, MUL VL]
     add sp, sp, x17
+#ifdef __APPLE__
+    smstop sm
+#endif
 .endm
 
 #ifdef __APPLE__
