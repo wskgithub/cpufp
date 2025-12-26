@@ -54,6 +54,8 @@ int main()
     if (hwcaps & HWCAP_SVE)
     {
         printf("_SVE_\n");
+        printf("_SVE_DP_\n");
+        printf("_SVE_HP_\n");
     }
 #endif
 #else

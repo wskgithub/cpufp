@@ -8,6 +8,10 @@
 #include <mach/thread_act.h>
 #include <mach/arm/kern_return.h>
 #endif
+#ifdef __ANDROID__
+#include <unistd.h>
+#include <sys/syscall.h>
+#endif
 #include <pthread.h>
 #include <sched.h>
 
@@ -54,17 +58,18 @@ struct smtl_tp_t
 
 static void thread_bind(int cpu)
 {
-#ifndef __APPLE__
+#if defined(__ANDROID__)
+    // Android uses sched_setaffinity instead of pthread_setaffinity_np
     cpu_set_t cpu_set;
     CPU_ZERO(&cpu_set);
     CPU_SET(cpu, &cpu_set);
-    if (pthread_setaffinity_np(pthread_self(),
-            sizeof(cpu_set_t), &cpu_set) != 0)
+    pid_t tid = gettid();
+    if (sched_setaffinity(tid, sizeof(cpu_set_t), &cpu_set) != 0)
     {
         fprintf(stderr, "Error: cpu[%d] bind failed.\n", cpu);
         exit(0);
     }
-#else
+#elif defined(__APPLE__)
     thread_policy_t cpu_set = &cpu;
     kern_return_t res = thread_policy_set(pthread_mach_thread_np(pthread_self()),
         THREAD_AFFINITY_POLICY, (thread_policy_t)&cpu_set, 1);
@@ -75,7 +80,18 @@ static void thread_bind(int cpu)
     if (res != KERN_SUCCESS) {
         fprintf(stderr, "Error: cpu[%d] bind failed, return code %i\n", cpu, res);
         exit(0);
-        }
+    }
+#else
+    // Linux with glibc uses pthread_setaffinity_np
+    cpu_set_t cpu_set;
+    CPU_ZERO(&cpu_set);
+    CPU_SET(cpu, &cpu_set);
+    if (pthread_setaffinity_np(pthread_self(),
+            sizeof(cpu_set_t), &cpu_set) != 0)
+    {
+        fprintf(stderr, "Error: cpu[%d] bind failed.\n", cpu);
+        exit(0);
+    }
 #endif
 }
 

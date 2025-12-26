@@ -67,6 +67,18 @@ extern "C"
     void sve_fmla_vv_f64f64f64(int64_t);
 #endif
 
+#ifdef _SVE_DP_
+    void sve_dp_vv_s32s8s8(int64_t);
+    void sve_dp_vs_s32s8s8(int64_t);
+    void sve_dp_vv_u32u8u8(int64_t);
+    void sve_dp_vs_u32u8u8(int64_t);
+#endif
+
+#ifdef _SVE_HP_
+    void sve_fmla_vv_fp16fp16fp16(int64_t);
+    void sve_fmla_vs_fp16fp16fp16(int64_t);
+#endif
+
 #ifdef _SME_
     // void sve_fmla_vv_f16f16f16(int64_t);
     void sve_fmla_vv_f32f32f32(int64_t);
@@ -344,17 +356,45 @@ static void cpufp_register_isa()
         LOOP_ITERATIONS, 96LL, asimd_fmla_vv_f64f64f64);
 #endif
 
+#ifdef _SVE_DP_
+    size_t sve_dp_len = 0;
+    __asm__ volatile("cntb %[len]" : [len] "=r"(sve_dp_len));
+
+    int64_t comp_pl_s32 = 768LL * (sve_dp_len / 16);
+    reg_new_isa("sve_dp", "dp.vv(s32,s8,s8)", "OPS",
+        LOOP_ITERATIONS, comp_pl_s32, sve_dp_vv_s32s8s8);
+    reg_new_isa("sve_dp", "dp.vs(s32,s8,s8)", "OPS",
+        LOOP_ITERATIONS, comp_pl_s32, sve_dp_vs_s32s8s8);
+
+    int64_t comp_pl_u32 = 768LL * (sve_dp_len / 16);
+    reg_new_isa("sve_dp", "dp.vv(u32,u8,u8)", "OPS",
+        LOOP_ITERATIONS, comp_pl_u32, sve_dp_vv_u32u8u8);
+    reg_new_isa("sve_dp", "dp.vs(u32,u8,u8)", "OPS",
+        LOOP_ITERATIONS, comp_pl_u32, sve_dp_vs_u32u8u8);
+#endif
+
+#ifdef _SVE_HP_
+    size_t sve_hp_len = 0;
+    __asm__ volatile("cntb %[len]" : [len] "=r"(sve_hp_len));
+
+    int64_t comp_pl_fp16 = 384LL * (sve_hp_len / 16);
+    reg_new_isa("sve_hp", "fmla.vv(fp16,fp16,fp16)", "FLOPS", LOOP_ITERATIONS,
+                comp_pl_fp16, sve_fmla_vv_fp16fp16fp16);
+    reg_new_isa("sve_hp", "fmla.vs(fp16,fp16,fp16)", "FLOPS", LOOP_ITERATIONS,
+                comp_pl_fp16, sve_fmla_vs_fp16fp16fp16);
+#endif
+
 #ifdef _SVE_
     size_t sve_len = 0;
     __asm__ volatile("cntb %[len]" : [len] "=r"(sve_len));
 
-    int64_t comp_pl_f16 = 48LL * (sve_len / 2);
+    int64_t comp_pl_f16 = 384LL * (sve_len / 16);
     reg_new_isa("sve", "fmla.vv(f16,f16,f16)", "FLOPS", LOOP_ITERATIONS,
                 comp_pl_f16, sve_fmla_vv_f16f16f16);
-    int64_t comp_pl_f32 = 48LL * (sve_len / 4);
+    int64_t comp_pl_f32 = 192LL * (sve_len / 16);
     reg_new_isa("sve", "fmla.vv(f32,f32,f32)", "FLOPS", LOOP_ITERATIONS,
                 comp_pl_f32, sve_fmla_vv_f32f32f32);
-    int64_t comp_pl_f64 = 48LL * (sve_len / 8);
+    int64_t comp_pl_f64 = 96LL * (sve_len / 16);
     reg_new_isa("sve", "fmla.vv(f64,f64,f64)", "FLOPS", LOOP_ITERATIONS,
                 comp_pl_f64, sve_fmla_vv_f64f64f64);
 #endif
