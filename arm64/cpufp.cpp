@@ -79,6 +79,13 @@ extern "C"
     void sve_fmla_vs_fp16fp16fp16(int64_t);
 #endif
 
+#ifdef _SVE_BF16_
+    void sve_bfmmla_fp32bf16bf16(int64_t);
+    // void sve_bfmmla_bf16bf16bf16(int64_t);
+    void sve_dp_vs_fp32bf16bf16(int64_t);
+    void sve_dp_vv_fp32bf16bf16(int64_t);
+#endif
+
 #ifdef _SME_
     // void sve_fmla_vv_f16f16f16(int64_t);
     void sve_fmla_vv_f32f32f32(int64_t);
@@ -382,6 +389,22 @@ static void cpufp_register_isa()
                 comp_pl_fp16, sve_fmla_vv_fp16fp16fp16);
     reg_new_isa("sve_hp", "fmla.vs(fp16,fp16,fp16)", "FLOPS", LOOP_ITERATIONS,
                 comp_pl_fp16, sve_fmla_vs_fp16fp16fp16);
+#endif
+
+#ifdef _SVE_BF16_
+    size_t sve_bf16_len = 0;
+    __asm__ volatile("cntb %[len]" : [len] "=r"(sve_bf16_len));
+
+    int64_t comp_pl_bfmmla = 768LL * (sve_bf16_len / 16);
+    int64_t comp_pl_dot = 384LL * (sve_bf16_len / 16);
+    reg_new_isa("sve_bf16", "bfmmla(f32,bf16,bf16)", "FLOPS",
+        LOOP_ITERATIONS, comp_pl_bfmmla, sve_bfmmla_fp32bf16bf16);
+    // reg_new_isa("sve_bf16", "bfmmla(bf16,bf16,bf16)", "FLOPS",
+    //     LOOP_ITERATIONS, comp_pl_bfmmla, sve_bfmmla_bf16bf16bf16);
+    reg_new_isa("sve_bf16", "dp.vs(f32,bf16,bf16)", "FLOPS",
+        LOOP_ITERATIONS, comp_pl_dot, sve_dp_vs_fp32bf16bf16);
+    reg_new_isa("sve_bf16", "dp.vv(f32,bf16,bf16)", "FLOPS",
+        LOOP_ITERATIONS, comp_pl_dot, sve_dp_vv_fp32bf16bf16);
 #endif
 
 #ifdef _SVE_

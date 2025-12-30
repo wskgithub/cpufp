@@ -22,7 +22,7 @@
 #   ARM64_FEATURES="_ASIMD_ _ASIMD_HP_ _ASIMD_DP_ _I8MM_ _BF16_" ./build_android_ndk.sh
 #
 #   # Build with SVE support (requires ARMv8.5-A+ CPU)
-#   ARM64_FEATURES="_ASIMD_ _ASIMD_HP_ _ASIMD_DP_ _SVE_ _SVE_DP_ _SVE_HP_" ./build_android_ndk.sh
+#   ARM64_FEATURES="_ASIMD_ _ASIMD_HP_ _ASIMD_DP_ _SVE_ _SVE_DP_ _SVE_HP_ _SVE_BF16_" ./build_android_ndk.sh
 #
 #   # Specify custom NDK path
 #   ANDROID_NDK=/path/to/ndk ./build_android_ndk.sh
@@ -39,6 +39,7 @@
 #   _SVE_       - Scalable Vector Extension (ARMv8.5-A+sve)
 #   _SVE_DP_    - SVE with Dot Product (ARMv8.5-A+sve)
 #   _SVE_HP_    - SVE with Half-precision FP (ARMv8.5-A+sve)
+#   _SVE_BF16_  - SVE with BFloat16 (ARMv8.6-A+sve+bf16)
 # Output:
 #   cpufp_android_arm64 - ARM64 executable for Android device
 #
@@ -170,7 +171,7 @@ if [ -z "$ARM64_FEATURES" ]; then
     echo ""
     echo "To specify custom features, set ARM64_FEATURES environment variable:"
     echo "  ARM64_FEATURES=\"_ASIMD_ _ASIMD_HP_ _ASIMD_DP_ _I8MM_ _BF16_\" ./build_android_ndk.sh"
-    echo "  ARM64_FEATURES=\"_ASIMD_ _ASIMD_HP_ _ASIMD_DP_ _SVE_ _SVE_DP_ _SVE_HP_\" ./build_android_ndk.sh"
+    echo "  ARM64_FEATURES=\"_ASIMD_ _ASIMD_HP_ _ASIMD_DP_ _SVE_ _SVE_DP_ _SVE_HP_ _SVE_BF16_\" ./build_android_ndk.sh"
 else
     echo ""
     echo "=== Using user-specified ARM64 features ==="
@@ -213,6 +214,10 @@ for SIMD in $ARM64_FEATURES; do
             # SVE half-precision requires ARMv8.5-A with SVE extension
             ARCH_FLAGS="-march=armv8.5-a+sve"
             ;;
+        "_SVE_BF16_")
+            # SVE BFloat16 requires ARMv8.6-A with SVE and BFloat16 extensions
+            ARCH_FLAGS="-march=armv8.6-a+sve+bf16"
+            ;;
         "_I8MM_")
             # I8MM requires ARMv8.6-A with i8mm extension
             ARCH_FLAGS="-march=armv8.6-a+i8mm"
@@ -254,6 +259,8 @@ elif [[ "$ARM64_FEATURES" == *"_SVE_HP_"* ]]; then
     CXX_ARCH_FLAGS="-march=armv8.5-a+sve"
 elif [[ "$ARM64_FEATURES" == *"_SVE_"* ]]; then
     CXX_ARCH_FLAGS="-march=armv8.5-a+sve"
+elif [[ "$ARM64_FEATURES" == *"_SVE_BF16_"* ]]; then
+    CXX_ARCH_FLAGS="-march=armv8.6-a+sve+bf16"
 elif [[ "$ARM64_FEATURES" == *"_I8MM_"* ]] || [[ "$ARM64_FEATURES" == *"_BF16_"* ]]; then
     if [[ "$ARM64_FEATURES" == *"_I8MM_"* ]] && [[ "$ARM64_FEATURES" == *"_BF16_"* ]]; then
         CXX_ARCH_FLAGS="-march=armv8.6-a+i8mm+bf16"
