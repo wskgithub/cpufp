@@ -216,7 +216,7 @@ for SIMD in $ARM64_FEATURES; do
             ARCH_FLAGS="-march=armv8.5-a+sve"
             ;;
         "_SVE_BF16_")
-            # SVE BFloat16 requires ARMv8.6-A with SVE and BFloat16 extensions
+            # SVE BFloat16 requires ARMv8.6-A with SVE and BFloat16 extension
             ARCH_FLAGS="-march=armv8.6-a+sve+bf16"
             ;;
         "_SVE_I8MM_")

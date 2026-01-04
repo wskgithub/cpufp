@@ -56,10 +56,17 @@ int main()
         printf("_SVE_\n");
         printf("_SVE_DP_\n");
         printf("_SVE_HP_\n");
+    }
+    if (hwcaps & HWCAP2_BF16)
+    {
         printf("_SVE_BF16_\n");
+    }
+    if (hwcaps & HWCAP2_I8MM)
+    {
         printf("_SVE_I8MM_\n");
     }
 #endif
+
 #else
     size_t size = 4;
     uint32_t res;
