@@ -94,14 +94,6 @@ extern "C"
     void sve_dp_vs_s32u8s8(int64_t);
     void sve_dp_vv_s32u8s8(int64_t);
 #endif
-
-#ifdef _SME_
-    // void sve_fmla_vv_f16f16f16(int64_t);
-    void sve_fmla_vv_f32f32f32(int64_t);
-    // void sve_fmla_vs_f32f32f32(int64_t);
-    // void sve_fmla_vs_f64f64f64(int64_t);
-    // void sve_fmla_vv_f64f64f64(int64_t);
-#endif
 }
 
 typedef struct
@@ -447,36 +439,6 @@ static void cpufp_register_isa()
     int64_t comp_pl_f64 = 96LL * (sve_len / 16);
     reg_new_isa("sve", "fmla.vv(f64,f64,f64)", "FLOPS", LOOP_ITERATIONS,
                 comp_pl_f64, sve_fmla_vv_f64f64f64);
-#endif
-
-#ifdef _SME_
-    size_t sme_len = 0;
-#ifdef __APPLE__
-    // Apple Silicon requires streaming mode to execute SVE instructions
-    __asm__ volatile(
-        "smstart sm\n\t"
-        "cntb %[len]\n\t"
-        "smstop sm"
-        : [len] "=r"(sme_len)
-    );
-#else
-    __asm__ volatile("cntb %[len]" : [len] "=r"(sme_len));
-#endif
-
-    // int64_t comp_pl_f16 = 48LL * (sme_len / 2);
-    // reg_new_isa("sve", "fmla.vv(f16,f16,f16)", "FLOPS", LOOP_ITERATIONS,
-    //             comp_pl_f16, sve_fmla_vv_f16f16f16);
-
-    int64_t comp_pl_f32 = 48LL * (sme_len / 4);
-    reg_new_isa("sve", "fmla.vv(f32,f32,f32)", "FLOPS", LOOP_ITERATIONS,
-                comp_pl_f32, sve_fmla_vv_f32f32f32);
-    // reg_new_isa("sve", "fmla.vs(f32,f32,f32)", "FLOPS", LOOP_ITERATIONS,
-    //             comp_pl_f32, sve_fmla_vs_f32f32f32);
-    // int64_t comp_pl_f64 = 48LL * (sme_len / 8);
-    // reg_new_isa("sve", "fmla.vv(f64,f64,f64)", "FLOPS", LOOP_ITERATIONS,
-    //             comp_pl_f64, sve_fmla_vv_f64f64f64);
-    // reg_new_isa("sve", "fmla.vs(f64,f64,f64)", "FLOPS", LOOP_ITERATIONS,
-    //             comp_pl_f64, sve_fmla_vs_f64f64f64);
 #endif
 }
 
