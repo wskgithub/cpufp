@@ -86,6 +86,15 @@ extern "C"
     void sve_dp_vv_fp32bf16bf16(int64_t);
 #endif
 
+#ifdef _SVE_I8MM_
+    void sve_mmla_s32s8s8(int64_t);
+    void sve_mmla_u32u8u8(int64_t);
+    void sve_mmla_s32u8s8(int64_t);
+    void sve_dp_vs_s32s8u8(int64_t);
+    void sve_dp_vs_s32u8s8(int64_t);
+    void sve_dp_vv_s32u8s8(int64_t);
+#endif
+
 #ifdef _SME_
     // void sve_fmla_vv_f16f16f16(int64_t);
     void sve_fmla_vv_f32f32f32(int64_t);
@@ -399,12 +408,30 @@ static void cpufp_register_isa()
     int64_t comp_pl_dot = 384LL * (sve_bf16_len / 16);
     reg_new_isa("sve_bf16", "bfmmla(f32,bf16,bf16)", "FLOPS",
         LOOP_ITERATIONS, comp_pl_bfmmla, sve_bfmmla_fp32bf16bf16);
-    // reg_new_isa("sve_bf16", "bfmmla(bf16,bf16,bf16)", "FLOPS",
-    //     LOOP_ITERATIONS, comp_pl_bfmmla, sve_bfmmla_bf16bf16bf16);
     reg_new_isa("sve_bf16", "dp.vs(f32,bf16,bf16)", "FLOPS",
         LOOP_ITERATIONS, comp_pl_dot, sve_dp_vs_fp32bf16bf16);
     reg_new_isa("sve_bf16", "dp.vv(f32,bf16,bf16)", "FLOPS",
         LOOP_ITERATIONS, comp_pl_dot, sve_dp_vv_fp32bf16bf16);
+#endif
+
+#ifdef _SVE_I8MM_
+    size_t sve_i8mm_len = 0;
+    __asm__ volatile("cntb %[len]" : [len] "=r"(sve_i8mm_len));
+    int64_t comp_pl_mmla = 1536LL * (sve_i8mm_len / 16);
+    int64_t comp_pl_dp = 768LL * (sve_i8mm_len / 16);
+
+    reg_new_isa("sve_i8mm", "mmla(s32,s8,s8)", "OPS",
+        LOOP_ITERATIONS, comp_pl_mmla, sve_mmla_s32s8s8);
+    reg_new_isa("sve_i8mm", "mmla(u32,u8,u8)", "OPS",
+        LOOP_ITERATIONS, comp_pl_mmla, sve_mmla_u32u8u8);
+    reg_new_isa("sve_i8mm", "mmla(s32,u8,s8)", "OPS",
+        LOOP_ITERATIONS, comp_pl_mmla, sve_mmla_s32u8s8);
+    reg_new_isa("sve_i8mm", "dp.vs(s32,s8,u8)", "OPS",
+        LOOP_ITERATIONS, comp_pl_dp, sve_dp_vs_s32s8u8);
+    reg_new_isa("sve_i8mm", "dp.vs(s32,u8,s8)", "OPS",
+        LOOP_ITERATIONS, comp_pl_dp, sve_dp_vs_s32u8s8);
+    reg_new_isa("sve_i8mm", "dp.vv(s32,u8,s8)", "OPS",
+        LOOP_ITERATIONS, comp_pl_dp, sve_dp_vv_s32u8s8);
 #endif
 
 #ifdef _SVE_

@@ -62,7 +62,6 @@ sve_bfmmla_fp32bf16bf16:
     dup z30.b, #0
     dup z31.b, #0
 
-    ptrue p0.s
 .sve.bfmmla.fp32bf16bf16.L1:
     bfmmla z8.s, z0.h, z1.h
     bfmmla z9.s, z0.h, z1.h
@@ -128,7 +127,6 @@ sve_dp_vs_fp32bf16bf16:
     dup z30.b, #0
     dup z31.b, #0
 
-    ptrue p0.s
 .sve.dp.vs.fp32bf16bf16.L1:
     bfdot z8.s, z0.h, z1.h[0]
     bfdot z9.s, z0.h, z1.h[0]
@@ -194,7 +192,6 @@ sve_dp_vv_fp32bf16bf16:
     dup z30.b, #0
     dup z31.b, #0
 
-    ptrue p0.s
 .sve.dp.vv.fp32bf16bf16.L1:
     bfdot z8.s, z0.h, z1.h
     bfdot z9.s, z0.h, z1.h

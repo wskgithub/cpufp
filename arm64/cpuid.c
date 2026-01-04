@@ -57,6 +57,7 @@ int main()
         printf("_SVE_DP_\n");
         printf("_SVE_HP_\n");
         printf("_SVE_BF16_\n");
+        printf("_SVE_I8MM_\n");
     }
 #endif
 #else

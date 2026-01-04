@@ -62,7 +62,6 @@ sve_dp_vv_s32s8s8:
     dup z30.b, #0
     dup z31.b, #0
 
-    ptrue p0.s
 .sve.dp.vv.s32s8s8.L1:
     sdot z8.s, z0.b, z1.b
     sdot z9.s, z0.b, z1.b
@@ -129,7 +128,6 @@ sve_dp_vs_s32s8s8:
     dup z30.b, #0
     dup z31.b, #0
 
-    ptrue p0.s
 .sve.dp.vs.s32s8s8.L1:
     sdot z8.s, z0.b, z1.b[0]
     sdot z9.s, z0.b, z1.b[0]
@@ -196,7 +194,6 @@ sve_dp_vv_u32u8u8:
     dup z30.b, #0
     dup z31.b, #0
 
-    ptrue p0.s
 .sve.dp.vv.u32u8u8.L1:
     udot z8.s, z0.b, z1.b
     udot z9.s, z0.b, z1.b
@@ -263,7 +260,6 @@ sve_dp_vs_u32u8u8:
     dup z30.b, #0
     dup z31.b, #0
 
-    ptrue p0.s
 .sve.dp.vs.u32u8u8.L1:
     udot z8.s, z0.b, z1.b[0]
     udot z9.s, z0.b, z1.b[0]

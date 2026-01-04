@@ -63,7 +63,6 @@ sve_fmla_vs_fp16fp16fp16:
     dup z30.b, #0
     dup z31.b, #0
 
-    ptrue p0.h
 .sve.fmla.vs.fp16fp16fp16.L1:
     fmla z8.h, z0.h, z1.h[0]
     fmla z9.h, z0.h, z1.h[0]
