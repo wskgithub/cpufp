@@ -36,9 +36,9 @@
 #   _ASIMD_DP_  - Dot Product (ARMv8.2-A+dotprod)
 #   _I8MM_      - Int8 Matrix Multiply (ARMv8.6-A+i8mm)
 #   _BF16_      - BFloat16 (ARMv8.6-A+bf16)
-#   _SVE_       - Scalable Vector Extension (ARMv8.5-A+sve)
-#   _SVE_DP_    - SVE with Dot Product (ARMv8.5-A+sve)
-#   _SVE_HP_    - SVE with Half-precision FP (ARMv8.5-A+sve)
+#   _SVE_       - Scalable Vector Extension (ARMv8.2-A+sve)
+#   _SVE_DP_    - SVE with Dot Product (ARMv8.2-A+sve)
+#   _SVE_HP_    - SVE with Half-precision FP (ARMv8.2-A+sve)
 #   _SVE_BF16_  - SVE with BFloat16 (ARMv8.6-A+sve+bf16)
 #   _SVE_I8MM_  - SVE with Int8 Matrix Multiply (ARMv8.6-A+sve+i8mm)
 # Output:
@@ -204,16 +204,16 @@ for SIMD in $ARM64_FEATURES; do
     # Select appropriate architecture flags based on SIMD feature
     case "$SIMD" in
         "_SVE_")
-            # SVE requires ARMv8.5-A with SVE extension
-            ARCH_FLAGS="-march=armv8.5-a+sve"
+            # SVE requires ARMv8.2-A with SVE extension
+            ARCH_FLAGS="-march=armv8.2-a+sve"
             ;;
         "_SVE_DP_")
             # SVE dot product requires SVE2 extension
-            ARCH_FLAGS="-march=armv8.5-a+sve"
+            ARCH_FLAGS="-march=armv8.2-a+sve"
             ;;
         "_SVE_HP_")
-            # SVE half-precision requires ARMv8.5-A with SVE extension
-            ARCH_FLAGS="-march=armv8.5-a+sve"
+            # SVE half-precision requires ARMv8.2-A with SVE extension
+            ARCH_FLAGS="-march=armv8.2-a+sve"
             ;;
         "_SVE_BF16_")
             # SVE BFloat16 requires ARMv8.6-A with SVE and BFloat16 extension
@@ -259,11 +259,11 @@ echo "=== Compiling cpufp main program ==="
 CXX_ARCH_FLAGS="-march=armv8-a"
 
 if [[ "$ARM64_FEATURES" == *"_SVE_DP_"* ]]; then
-    CXX_ARCH_FLAGS="-march=armv8.5-a+sve"
+    CXX_ARCH_FLAGS="-march=armv8.2-a+sve"
 elif [[ "$ARM64_FEATURES" == *"_SVE_HP_"* ]]; then
-    CXX_ARCH_FLAGS="-march=armv8.5-a+sve"
+    CXX_ARCH_FLAGS="-march=armv8.2-a+sve"
 elif [[ "$ARM64_FEATURES" == *"_SVE_"* ]]; then
-    CXX_ARCH_FLAGS="-march=armv8.5-a+sve"
+    CXX_ARCH_FLAGS="-march=armv8.2-a+sve"
 elif [[ "$ARM64_FEATURES" == *"_SVE_BF16_"* ]]; then
     CXX_ARCH_FLAGS="-march=armv8.6-a+sve+bf16"
 elif [[ "$ARM64_FEATURES" == *"_SVE_I8MM_"* ]]; then
